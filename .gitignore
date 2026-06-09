@@ -1,0 +1,7 @@
+.env
+.env.local
+__pycache__/
+*.pyc
+faiss.index
+faiss.index.meta
+node_modules/
