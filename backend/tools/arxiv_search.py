@@ -29,16 +29,29 @@ async def search_arxiv(
             max_results=max_results,
             sort_by=arxiv.SortCriterion.Relevance
         )
+        WITHDRAWN_SIGNALS = [
+            "withdrawn", "retracted", "duplicate of", 
+            "submitted under a pseudonym", "fictitious", 
+            "this paper has been", "administratively"
+        ]
         results = []
         for paper in client.results(search):
+            abstract_lower = paper.summary.lower()
+            title_lower = paper.title.lower()
+            # Skip withdrawn or retracted papers
+            if any(signal in abstract_lower or signal in title_lower 
+                   for signal in WITHDRAWN_SIGNALS):
+                continue
             results.append({
                 "title": paper.title,
-                "abstract": paper.summary[:800],  # Truncate to save tokens
+                "abstract": paper.summary[:800],
                 "url": paper.entry_id,
                 "authors": [a.name for a in paper.authors[:3]],
                 "published": str(paper.published.date()),
             })
-        return results
+        # Sort by published date, newest first
+        results.sort(key=lambda x: x["published"], reverse=True)
+        return results[:max_results]
 
     # Run blocking IO in thread pool to not block the event loop
     return await asyncio.get_event_loop().run_in_executor(None, _search)
