@@ -8,12 +8,14 @@ This is the core of the RAG pipeline:
 import os
 import asyncio
 from openai import AsyncOpenAI
+from dotenv import load_dotenv
+load_dotenv()
 from retrieval.vector_store import VectorStore
 
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url="https://openrouter.ai/api/v1")
 store = VectorStore()
 
-EMBEDDING_MODEL = "text-embedding-3-small"  # 1536-dim, cheap and fast
+EMBEDDING_MODEL = "openai/text-embedding-3-small"  # 1536-dim, cheap and fast
 
 
 async def embed_text(text: str) -> list[float]:

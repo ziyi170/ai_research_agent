@@ -7,6 +7,7 @@ This is the core "brain" of the agent system.
 
 import asyncio
 from tools.arxiv_search import search_arxiv
+from retrieval.retriever import index_documents
 from tools.summariser import summarise_with_llm
 from retrieval.retriever import retrieve_docs
 from llm.client import call_llm
@@ -35,6 +36,10 @@ class AgentPlanner:
         Returns ordered list of tool names to execute.
         """
         query_lower = query.lower()
+
+        # Follow-up intent — use memory, don't re-search
+        if any(kw in query_lower for kw in ["second", "third", "first", "elaborate", "tell me more", "expand", "previous", "last", "that paper"]):
+            return ["llm_answer"]
 
         # Research / paper intent
         if any(kw in query_lower for kw in ["paper", "research", "arxiv", "study", "author"]):
@@ -69,9 +74,14 @@ class AgentPlanner:
             steps_taken.append(tool_name)
 
             if tool_name == "search_arxiv":
-                results = await search_arxiv(query)
+                search_query = f"{query} research paper"
+                results = await search_arxiv(search_query)
                 sources.extend([r["url"] for r in results])
                 context_chunks.extend([r["abstract"] for r in results])
+                await index_documents([
+                    {"text": r["abstract"], "source": r["url"]}
+                    for r in results
+                ])
 
             elif tool_name == "retrieve_docs":
                 results = await retrieve_docs(query, top_k=top_k)
@@ -87,10 +97,18 @@ class AgentPlanner:
                 )
                 return {
                     "answer": answer,
-                    "sources": list(set(sources)),
-                    "steps": steps_taken
+                    "sources": list(dict.fromkeys(sources)),
+                    "steps": steps_taken,
+                    "abstracts": context_chunks
                 }
 
         # Fallback if plan didn't include a generation step
-        answer = await call_llm(query=query, context="", history=history)
+        # Extract paper references from history to use as context
+        print("DEBUG history length:", len(history))
+        print("DEBUG history contents:", [m.get("content","")[:100] for m in history])
+        paper_context = ""
+        for msg in history:
+            if "[Papers referenced:" in msg.get("content", ""):
+                paper_context = msg["content"].split("[Papers referenced:")[-1].rstrip("]")
+        answer = await call_llm(query=query, context=paper_context, history=history)
         return {"answer": answer, "sources": [], "steps": steps_taken}

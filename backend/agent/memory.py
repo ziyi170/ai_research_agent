@@ -17,7 +17,7 @@ class ConversationMemory:
     compatible with the OpenAI messages format.
     """
 
-    def __init__(self, max_turns: int = 10):
+    def __init__(self, max_turns: int = 3):
         self._store: dict[str, list[dict]] = defaultdict(list)
         self.max_turns = max_turns  # sliding window to stay within context limit
 

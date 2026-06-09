@@ -43,11 +43,23 @@ async def handle_query(request: QueryRequest):
             top_k=request.top_k
         )
 
-        # Save turn to memory
+        # Save turn to memory (include sources so follow-up questions have context)
+        assistant_with_sources = result["answer"]
+        if result["sources"]:
+            pairs = list(zip(result["sources"], result.get("abstracts", [])))
+            if pairs:
+                abstract_text = "\n".join(
+                    f"Paper {i+1} ({url}):\n{abstract[:200]}..."
+                    for i, (url, abstract) in enumerate(pairs)
+                )
+                assistant_with_sources += f"\n\n[Papers referenced:\n{abstract_text}]"
+            else:
+                assistant_with_sources += f"\n\n[Sources: {', '.join(result['sources'])}]"
+
         memory.add_turn(
             session_id=request.session_id,
             user_msg=request.query,
-            assistant_msg=result["answer"]
+            assistant_msg=assistant_with_sources
         )
 
         return QueryResponse(

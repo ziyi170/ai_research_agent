@@ -27,7 +27,7 @@ async def search_arxiv(
         search = arxiv.Search(
             query=query,
             max_results=max_results,
-            sort_by=sort_by
+            sort_by=arxiv.SortCriterion.Relevance
         )
         results = []
         for paper in client.results(search):

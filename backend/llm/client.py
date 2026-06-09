@@ -14,6 +14,7 @@ client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url="https://open
 
 SYSTEM_PROMPT = """You are a helpful AI research assistant.
 When given context from retrieved documents, use it to answer the user's question accurately.
+If the user refers to a paper by number (e.g. "second paper"), look in the conversation history for [Papers referenced] and use that information to answer.
 If the context doesn't contain the answer, say so clearly.
 Always be concise and cite the source when possible."""
 
