@@ -19,4 +19,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def root():
+    return {"message": "AI Research Agent backend is running", "status": "ok"}
+
 app.include_router(router, prefix="/api")
