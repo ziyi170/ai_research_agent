@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 from retrieval.vector_store import VectorStore
 
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url="https://openrouter.ai/api/v1")
+client = AsyncOpenAI(api_key=os.getenv("OPENROUTER_API_KEY"), base_url="https://openrouter.ai/api/v1")
 store = VectorStore()
 
 EMBEDDING_MODEL = "openai/text-embedding-3-small"  # 1536-dim, cheap and fast

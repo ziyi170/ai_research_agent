@@ -30,9 +30,11 @@ async def search_arxiv(
             sort_by=arxiv.SortCriterion.Relevance
         )
         WITHDRAWN_SIGNALS = [
-            "withdrawn", "retracted", "duplicate of", 
-            "submitted under a pseudonym", "fictitious", 
-            "this paper has been", "administratively"
+            "this paper has been withdrawn",
+            "this paper has been retracted", 
+            "duplicate of arxiv",
+            "submitted under a pseudonym",
+            "administratively withdrawn"
         ]
         results = []
         for paper in client.results(search):

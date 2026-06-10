@@ -16,7 +16,7 @@ planner = AgentPlanner()
 class QueryRequest(BaseModel):
     query: str
     session_id: str = "default"
-    top_k: Optional[int] = 3
+    top_k: Optional[int] = 8
 
 
 class QueryResponse(BaseModel):
