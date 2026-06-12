@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
-const API_BASE = process.env.REACT_APP_API_URL || '';
+const API_BASE = process.env.REACT_APP_API_URL || window.location.origin;
 
 const styles = {
   root: {
@@ -233,7 +233,7 @@ export default function App() {
     } catch (err) {
       setMessages(prev => [
         ...prev.slice(0, -1),
-        { role: 'assistant', content: '⚠ Could not reach the backend. Make sure uvicorn is running on port 8000.' },
+        { role: 'assistant', content: '⚠ Could not reach the backend. Check the backend URL and deployment.' },
       ]);
     } finally {
       setLoading(false);
